@@ -1,0 +1,15 @@
+export const responses = {
+  successGetBlogs: "Success get blogs",
+  successCreateBlog: "Success create blog",
+  successUpdateBlog: "Success update blog",
+  successDeleteBlog: "Success delete blog",
+  errorNotFound: "Blog not found",
+  errorGetBlogs: "Error get blogs",
+  errorCreateBlog: "Error create blog",
+  errorUpdateBlog: "Error update blog",
+  errorDeleteBlog: "Error delete blog",
+  successAuthentication: "Authentication successful",
+  errorAuthentication: "Authentication failed",
+  errorUnauthorized: "Unauthorized access",
+  errorForbidden: "Forbidden access",
+};

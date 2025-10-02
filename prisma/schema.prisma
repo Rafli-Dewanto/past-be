@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPERADMIN
+}
+
+model Blog {
+  id          Int       @id @default(autoincrement()) @db.Integer
+  uuid        String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title       String    @db.VarChar(150)
+  content     String    @db.Text
+  thumbnail   String?   @db.VarChar(2083)
+  isPublished Boolean   @default(false) @map("is_published")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
+  userId      Int       @db.Integer
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("blogs")
+}
+
+model User {
+  id        Int       @id @default(autoincrement()) @db.Integer
+  uuid      String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String    @db.VarChar(100)
+  email     String    @unique @db.VarChar(320)
+  password  String    @db.VarChar(72)
+  role      UserRole  @default(USER)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  blogs   Blog[]
+  apiLogs ApiLog[]
+
+  @@map("users")
+}
+
+enum LogLevel {
+  DEBUG
+  INFO
+  WARN
+  ERROR
+  FATAL
+}
+
+enum LogStatus {
+  SUCCESS
+  ERROR
+  TIMEOUT
+}
+
+model ApiLog {
+  id           Int       @id @default(autoincrement()) @db.Integer
+  uuid         String    @unique @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  requestId    String    @unique @map("request_id") @db.VarChar(36)
+  method       String    @db.VarChar(10)
+  url          String    @db.Text
+  route        String?   @db.VarChar(255)
+  statusCode   Int       @map("status_code") @db.Integer
+  responseTime Int       @map("response_time") @db.Integer // in milliseconds
+  userAgent    String?   @map("user_agent") @db.Text
+  ip           String    @db.VarChar(45) // IPv6 max length
+  userId       Int?      @map("user_id") @db.Integer
+  level        LogLevel  @default(INFO)
+  status       LogStatus @default(SUCCESS)
+  requestBody  Json?     @map("request_body") @db.Json
+  responseBody Json?     @map("response_body") @db.Json
+  headers      Json?     @db.Json
+  errorMessage String?   @map("error_message") @db.Text
+  stackTrace   String?   @map("stack_trace") @db.Text
+  fileTrace    Json?     @map("file_trace") @db.Json // Array of {file, line, function, column}
+  metadata     Json?     @db.Json // Additional context data
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([requestId])
+  @@index([method, url])
+  @@index([statusCode])
+  @@index([userId])
+  @@index([level])
+  @@index([createdAt])
+  @@map("api_logs")
+}

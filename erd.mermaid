@@ -1,0 +1,25 @@
+erDiagram
+    USER {
+        Int id PK
+        String name
+        String email "unique"
+        String password
+        UserRole role "enum(USER, ADMIN, SUPERADMIN)"
+        DateTime createdAt
+        DateTime updatedAt
+        DateTime deletedAt
+    }
+
+    BLOG {
+        Int id PK
+        String title
+        Text content
+        String thumbnail
+        Boolean isPublished
+        DateTime createdAt
+        DateTime updatedAt
+        DateTime deletedAt
+        Int userId FK
+    }
+
+    USER ||--o{ BLOG : "has many"
